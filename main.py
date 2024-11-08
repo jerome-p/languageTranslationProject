@@ -116,7 +116,7 @@ def run_validation(model, validation_ds, tokenizer_src, tokenizer_tgt, max_len, 
 
         # Compute the BLEU metric
         metric = torchmetrics.BLEUScore()
-        bleu = metric(predicted, expected)
+        bleu = metric(predicted, [expected])
         writer.add_scalar('validation BLEU', bleu, global_step)
         writer.flush()
 
@@ -213,6 +213,7 @@ def train_model(config):
         initial_epoch = state['epoch'] + 1
         optimizer.load_state_dict(state['optimizer_state_dict'])
         global_step = state['global_step']
+        
     else:
         print('No model to preload, starting from scratch')
 
