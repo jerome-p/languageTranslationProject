@@ -139,6 +139,9 @@ def get_or_build_tokenizer(config, ds, lang):
 
 def get_ds(config):
     # It only has the train split, so we divide it overselves
+    print("***********#@$*#%*@$YR")
+    print(f"{config['datasource']}", f"{config['lang_src']}-{config['lang_tgt']}")
+    print("*******W&R*&ER")
     ds_raw = load_dataset(f"{config['datasource']}", f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
