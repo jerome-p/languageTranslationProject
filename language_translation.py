@@ -67,9 +67,13 @@ from datasets import load_dataset
 import evaluate
 import torch
 from peft import LoraConfig, get_peft_model
+import numpy as np
+import os
+import torchmetrics
+
+# 12:40 am logs
 
 # Step 1: Load the pre-trained T5 model and tokenizer
-model_name = "t5-small"  # Choose T5 variant like 't5-base' or 't5-large' for larger models
 tokenizer = AutoTokenizer.from_pretrained("google-t5/t5-base")
 model = AutoModelForSeq2SeqLM.from_pretrained("google-t5/t5-base")  
 
@@ -79,17 +83,18 @@ target = 'fi'
 # Specify the language pair (e.g., English to French: 'eng-fra')
 # language_pair = "eng-fra"
 raw_datasets = load_dataset("Helsinki-NLP/tatoeba", lang1='en', lang2='fi' , trust_remote_code=True)
-print(raw_datasets['train'])
-split_datasets = raw_datasets["train"].train_test_split(train_size=0.1, seed=20)
-print(split_datasets)
-split_datasets = split_datasets["train"].train_test_split(train_size=0.7, seed=20)
+# print(raw_datasets['train'])
+split_dataset = raw_datasets["train"].train_test_split(train_size=0.6, seed=20)
+print(split_dataset)
+split_datasets = split_dataset["train"].train_test_split(train_size=0.7, seed=20)
 print(split_datasets)
 
 split_datasets["validation"] = split_datasets.pop("test")
-print(split_datasets["train"][1]["translation"])
+# print(split_datasets["train"][1]["translation"])
 
-translator = pipeline("translation_en_to_fi", model=model_name, device="cuda")
-print(translator("Default to expanded threads"))
+# model_name = "t5-small"  # Choose T5 variant like 't5-base' or 't5-large' for larger models
+# translator = pipeline("translation_en_to_fi", model=model_name, device="cuda")
+# print(translator("Default to expanded threads"))
 
 source_lang = "en"
 target_lang = "fi"
@@ -113,21 +118,33 @@ tokenized_datasets = split_datasets.map(preprocess_function, batched=True)
 
 
 # Step 3: Create data collator
-data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, model=model)
+data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, model=model, label_pad_token_id=tokenizer.pad_token_id)
 
 
 # Step 4: Define evaluation metrics
 bleu = evaluate.load("bleu")
+bleu_metric = torchmetrics.BLEUScore()
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
+    
+    # Replace -100s in the labels as we can't decode them
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    
     decoded_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
     
     # Format labels for BLEU
     decoded_labels = [[label] for label in decoded_labels]
+    # print(decoded_labels)
     results = bleu.compute(predictions=decoded_preds, references=decoded_labels)
-    return {"bleu": results["bleu"]}
+    bleu_2 = bleu_metric(decoded_preds, decoded_labels)
+    # print("bleu22222")
+    # print(bleu_2)
+    print(results)
+    return {"bleu": results["bleu"],
+            "bleu_2": bleu_2
+    }
 
 lora_config = LoraConfig(
     r=32, # Rank
@@ -139,24 +156,31 @@ lora_config = LoraConfig(
 )
 peft_model = get_peft_model(model, lora_config)
 
-
+save_directory = "./4_lora_t5_translation_model"
 # Step 5: Define training arguments
 training_args = Seq2SeqTrainingArguments(
     # peft_model,
-    output_dir="./lora_t5_translation_model",
+    output_dir= save_directory,
     evaluation_strategy="epoch",
     learning_rate=1e-5,
     # per_device_train_batch_size=16,
     # per_device_eval_batch_size=16,
-    # weight_decay=0.01,
+    weight_decay=0.01,
     # save_total_limit=3,
-    # num_train_epochs=3,
+    num_train_epochs=50,
     predict_with_generate=True,
-    fp16=True,  # Enable if GPU supports mixed precision
-    logging_dir="./lora_finetune_logs",
+    # fp16=True,  # Enable if GPU supports mixed precision
+    logging_dir="./4_lora_finetune_logs",
     logging_steps=10,
 )
+# if os.path.isdir("./lora_t5_translation_model"):
+#     train_model = AutoModelForSeq2SeqLM.from_pretrained("./lora_fine_tuned_t5_translation_model")  
 
+#     print("Using previously fine tuned model.........")
+# else:
+#     train_model = peft_model
+#     print("Starting from scracth.........")
+    
 # Step 6: Initialize Trainer
 trainer = Seq2SeqTrainer(
     model=peft_model,
@@ -170,15 +194,26 @@ trainer = Seq2SeqTrainer(
 
 
 # Step 7: Fine-tune the model
-trainer.train()
+
+# Check for a checkpoint to resume training
+checkpoint_path = os.path.join(save_directory, "checkpoint-126930") # Change before training
+print(checkpoint_path)
+if os.path.exists(checkpoint_path):
+    print("Resuming training from the last checkpoint...")
+    trainer.train(resume_from_checkpoint=checkpoint_path)
+else:
+    print("Starting training from scratch...")
+    trainer.train()
+# trainer.train()
 
 # Step 8: Save the fine-tuned model
-trainer.save_model("./lora_fine_tuned_t5_translation_model")
-tokenizer.save_pretrained("./lora_fine_tuned_t5_translation_model")
+trainer.save_model("./4_lora_fine_tuned_t5_translation_model")
+tokenizer.save_pretrained("./4_lora_fine_tuned_t5_translation_model")
 
 # Step 9: Test the fine-tuned model
 from transformers import pipeline
 
-translator = pipeline("translation", model="./lora_fine_tuned_t5_translation_model", tokenizer="./lora_fine_tuned_t5_translation_model")
-result = translator("How are you?")
+translator = pipeline("translation_en_to_fi", model="./4_lora_fine_tuned_t5_translation_model", 
+                      tokenizer="./4_lora_fine_tuned_t5_translation_model", device="cuda")
+result = translator("Translate English to Finnish: How are you?")
 print(result)
