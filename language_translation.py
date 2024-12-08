@@ -84,8 +84,9 @@ target = 'fi'
 # language_pair = "eng-fra"
 raw_datasets = load_dataset("Helsinki-NLP/tatoeba", lang1='en', lang2='fi' , trust_remote_code=True)
 # print(raw_datasets['train'])
-split_dataset = raw_datasets["train"].train_test_split(train_size=0.6, seed=20)
-print(split_dataset)
+split_dataset = raw_datasets["train"].train_test_split(train_size=0.7, seed=20)
+print(split_dataset) 
+#Giving the model 70% from 60% dataset from epoch 100, which weirdly made the epoch count to 70.
 split_datasets = split_dataset["train"].train_test_split(train_size=0.7, seed=20)
 print(split_datasets)
 
@@ -162,12 +163,12 @@ training_args = Seq2SeqTrainingArguments(
     # peft_model,
     output_dir= save_directory,
     evaluation_strategy="epoch",
-    learning_rate=1e-5,
-    # per_device_train_batch_size=16,
-    # per_device_eval_batch_size=16,
-    weight_decay=0.01,
-    # save_total_limit=3,
-    num_train_epochs=50,
+    learning_rate=2e-5, # changed learning rate at epoch 100
+    per_device_train_batch_size=20, # turned on batch size at epoch 80
+    per_device_eval_batch_size=20,
+    weight_decay=0.01, #changed from 0.01 to 0.1 at epoch 48.5
+    save_total_limit=3, # enabled at 100
+    num_train_epochs=150,
     predict_with_generate=True,
     # fp16=True,  # Enable if GPU supports mixed precision
     logging_dir="./4_lora_finetune_logs",
@@ -196,7 +197,7 @@ trainer = Seq2SeqTrainer(
 # Step 7: Fine-tune the model
 
 # Check for a checkpoint to resume training
-checkpoint_path = os.path.join(save_directory, "checkpoint-126930") # Change before training
+checkpoint_path = os.path.join(save_directory, "checkpoint-429000") # Change before training
 print(checkpoint_path)
 if os.path.exists(checkpoint_path):
     print("Resuming training from the last checkpoint...")
@@ -211,9 +212,9 @@ trainer.save_model("./4_lora_fine_tuned_t5_translation_model")
 tokenizer.save_pretrained("./4_lora_fine_tuned_t5_translation_model")
 
 # Step 9: Test the fine-tuned model
-from transformers import pipeline
+# from transformers import pipeline
 
-translator = pipeline("translation_en_to_fi", model="./4_lora_fine_tuned_t5_translation_model", 
-                      tokenizer="./4_lora_fine_tuned_t5_translation_model", device="cuda")
-result = translator("Translate English to Finnish: How are you?")
-print(result)
+# translator = pipeline("translation_en_to_fi", model="./4_lora_fine_tuned_t5_translation_model", 
+#                       tokenizer="./4_lora_fine_tuned_t5_translation_model", device="cuda")
+# result = translator("Translate English to Finnish: How are you?")
+# print(result)
