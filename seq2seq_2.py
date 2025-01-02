@@ -622,7 +622,7 @@ epoch_start, best_loss = load_model_if_exists(encoder, encoder_optimizer)
 criterion = nn.CrossEntropyLoss().to(device)
 
 # Initialize TensorBoard SummaryWriter
-writer = SummaryWriter(log_dir='./runs/seq2seq_training')
+writer = SummaryWriter(log_dir='./runs/seq2seq_training_2')
 
 # Training step
 def train_step(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, max_length=10):
@@ -694,8 +694,11 @@ for epoch in range(epoch_start, num_epochs):
     best_loss = save_model_if_improved(epoch_loss, best_loss, encoder, encoder_optimizer, epoch)
 
     # Log the loss to TensorBoard
+    writer.add_scalar('train loss', loss, epoch)
+
     writer.add_scalar('Loss/epoch', epoch_loss, epoch)
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
 
 # Close the TensorBoard writer
 writer.close()
+

@@ -22,6 +22,9 @@ from tokenizers.pre_tokenizers import Whitespace
 import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
 
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
 def greedy_decode(model, source, source_mask, tokenizer_src, tokenizer_tgt, max_len, device):
     sos_idx = tokenizer_tgt.token_to_id('[SOS]')
     eos_idx = tokenizer_tgt.token_to_id('[EOS]')
@@ -139,9 +142,7 @@ def get_or_build_tokenizer(config, ds, lang):
 
 def get_ds(config):
     # It only has the train split, so we divide it overselves
-    print("***********#@$*#%*@$YR")
-    print(f"{config['datasource']}", f"{config['lang_src']}-{config['lang_tgt']}")
-    print("*******W&R*&ER")
+
     ds_raw = load_dataset(f"{config['datasource']}", f"{config['lang_src']}-{config['lang_tgt']}", split='train')
 
     # Build tokenizers
@@ -159,16 +160,31 @@ def get_ds(config):
     # Find the maximum length of each sentence in the source and target sentence
     max_len_src = 0
     max_len_tgt = 0
-
+    en_text = ""
+    fi_text = ""
     for item in ds_raw:
         src_ids = tokenizer_src.encode(item['translation'][config['lang_src']]).ids
         tgt_ids = tokenizer_tgt.encode(item['translation'][config['lang_tgt']]).ids
         max_len_src = max(max_len_src, len(src_ids))
         max_len_tgt = max(max_len_tgt, len(tgt_ids))
+        
+        en_text += " " + item['translation'][config['lang_src']]
+        fi_text += " " + item['translation'][config['lang_tgt']]
+        
+    plt.imshow(WordCloud().generate(en_text))
+    plt.show()
+    
+    plt.imshow(WordCloud().generate(fi_text))
+    plt.show()       
+
 
     print(f'Max length of source sentence: {max_len_src}')
     print(f'Max length of target sentence: {max_len_tgt}')
-    
+    print(f'Vocab size of source sentence: {tokenizer_src.get_vocab_size()}')
+    print(f'Vocab size of target sentence: {tokenizer_tgt.get_vocab_size()}')
+
+    en_text=""
+    fi_text=""
 
     train_dataloader = DataLoader(train_ds, batch_size=config['batch_size'], shuffle=True)
     val_dataloader = DataLoader(val_ds, batch_size=1, shuffle=True)

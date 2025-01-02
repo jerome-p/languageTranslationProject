@@ -7,6 +7,22 @@ model = AutoModelForSeq2SeqLM.from_pretrained("./4_lora_fine_tuned_t5_translatio
 tokenizer = AutoTokenizer.from_pretrained("google-t5/t5-base", padding_side="left")
 tokenizer.pad_token = tokenizer.eos_token = '<pad>'
 
+input_ids = tokenizer("translate English to Finnish: How are you today?", return_tensors="pt").input_ids
+outputs = model.generate(input_ids, max_new_tokens = 512)
+output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(output)
+
+
+input_ids = tokenizer("How are you today?", return_tensors="pt").input_ids
+outputs = model.generate(input_ids, max_new_tokens = 512)
+output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(output)
+
+input_ids = tokenizer("translate English to French: How are you today?", return_tensors="pt").input_ids
+outputs = model.generate(input_ids, max_new_tokens = 512)
+output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(output)
+
 # tokenized_prompts = tokenizer(['Is this', 'What is the matter'], padding=True, return_tensors='pt')
 # set_seed(42)
 # model_op = model.generate(input_ids=tokenized_prompts['input_ids'].to(device),
@@ -23,18 +39,15 @@ tokenizer.pad_token = tokenizer.eos_token = '<pad>'
 # result = translator("Translate English to Finnish: How are you?")
 # print(result)
 
-input_ids = tokenizer("translate English to Finnish: The house is wonderful.", return_tensors="pt").input_ids
-outputs = model.generate(input_ids)
-output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-print(output)
+
 # bleu = evaluate.load("bleu")
 # results = bleu.compute(predictions=output, references="Talo on ihana.")
 # print(results)
 # Das Haus ist wunderbar.
 
-# translator = pipeline("translation_en_to_fi",model='google-t5/t5-base', device="cuda")
-# print("Pipeline base model translation: \n")
-# print(translator("translate English to Finnish: The house is wonderful."))
+translator = pipeline("translation_en_to_fi",model='google-t5/t5-base', device="cuda")
+print("Pipeline base model translation: \n")
+print(translator("translate English to Finnish: The house is wonderful."))
 
 # from transformers import T5Tokenizer, T5ForConditionalGeneration
 
@@ -42,10 +55,10 @@ print(output)
 
 # model = T5ForConditionalGeneration.from_pretrained('t5-small', return_dict=True)
 
-# # input = "My name is quack quack and I live in the north pole"
+# input = "My name is quack quack and I live in the north pole"
 # print("Translate using t5 small")
 # # You can also use "translate English to French" and "translate English to Romanian"
-# # input_ids = tokenizer("translate English to Finnish: "+input, return_tensors="pt").input_ids  # Batch size 1
+# input_ids = tokenizer("translate English to Finnish: "+input, return_tensors="pt").input_ids  # Batch size 1
 
 # outputs = model.generate(input_ids)
 
