@@ -162,5 +162,26 @@ cython_debug/
 #.idea/
 
 opus_books_weights/
-
+data/
+seq2seq2_checkpoints/
 *.pt
+9_lora_t5_translation_model/
+4_lora_t5_translation_model/
+7_lora_t5_translation_model/
+8_lora_t5_translation_model/
+9_lora_fine_tuned_t5_translation_model/
+4_lora_fine_tuned_t5_translation_model/
+7_lora_fine_tuned_t5_translation_model/
+8_lora_fine_tuned_t5_translation_model/
+9_lora_fine_tuned_t5_translation_model_tokenizer/
+4_lora_fine_tuned_t5_translation_model_tokenizer/
+7_lora_fine_tuned_t5_translation_model_tokenizer/
+8_lora_fine_tuned_t5_translation_model_tokenizer/
+9_lora_finetune_logs/
+4_lora_finetune_logs/
+7_lora_finetune_logs/
+8_lora_finetune_logs/
+seq2seq2_checkpoints/
+runs/
+*.json
+t5_translation_model/*
