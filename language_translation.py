@@ -159,7 +159,7 @@ training_args = Seq2SeqTrainingArguments(
     # fp16=True,  # Enable if GPU supports mixed precision
     logging_dir="./9_lora_finetune_logs",
     logging_steps=10,
-    load_best_model_at_end=True
+    # load_best_model_at_end=True
 )
     
 # Step 6: Initialize Trainer
@@ -186,7 +186,7 @@ trainer = Seq2SeqTrainer(
 
 
 # Check for a checkpoint to resume training
-checkpoint_path = os.path.join(save_directory, "checkpoint-9000") # Change before training
+checkpoint_path = os.path.join(save_directory, "checkpoint-42850") # Change before training
 print(checkpoint_path)
 if os.path.exists(checkpoint_path): 
     print("Resuming training from the last checkpoint...")
