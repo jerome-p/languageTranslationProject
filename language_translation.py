@@ -153,7 +153,7 @@ training_args = Seq2SeqTrainingArguments(
     per_device_eval_batch_size=16,
     weight_decay=0.01, #changed from 0.01 to 0.1 at epoch 48.5
     save_total_limit=10, # enabled at 100
-    num_train_epochs=50, # was 250
+    num_train_epochs=100, # was 250
     predict_with_generate=True,
     generation_max_length = 80, # Since train data max length is 389
     # fp16=True,  # Enable if GPU supports mixed precision
@@ -197,8 +197,8 @@ else:
 # trainer.train()
 
 # Step 8: Save the fine-tuned model
-trainer.save_model("./9_lora_fine_tuned_t5_translation_model")
-tokenizer.save_pretrained("./9_lora_fine_tuned_t5_translation_model_tokenizer")
+trainer.save_model("./9_lora_fine_tuned_t5_translation_model_epoch100")
+tokenizer.save_pretrained("./9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100")
 
 # Step 9: Test the fine-tuned model
 # from transformers import pipeline
