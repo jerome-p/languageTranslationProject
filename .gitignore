@@ -181,6 +181,8 @@ finetune_t5/9_lora_finetune_logs/
 finetune_t5/4_lora_finetune_logs/
 finetune_t5/7_lora_finetune_logs/
 finetune_t5/8_lora_finetune_logs/
+finetune_t5/data40_9_lora_fine_tuned_t5_translation_model_epoch100/*
+finetune_t5/9_lora_fine_tuned_t5_translation_model_epoch100/*
 seq2seq/seq2seq2_checkpoints/
 seq2seq/runs/
 transformer/runs/
