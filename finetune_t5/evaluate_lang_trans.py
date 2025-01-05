@@ -30,26 +30,64 @@ print("EN->DE")
 print(translator("translate English to German: The house is wonderful."))
 print("EN->FI")
 print(translator("translate English to Finnish: The house is wonderful."))
-print("T5 base model cannot translate to Finnish")
+print("Note:T5 base model cannot translate to Finnish")
 
-print("Evaluating using fine tuned T5model: \n")
+eval_texts = ["The house is wonderful.", "I have mixed emotions!", "I have mixed emotions about it...","How are you today?" ]
 
-
-print(evaluate_model("./4_lora_fine_tuned_t5_translation_model", 
+print("Evaluating using fine tuned T5model generatio length set to 20: \n")
+print("The house is wonderful."+"---> "+evaluate_model("./4_lora_fine_tuned_t5_translation_model", 
                "google-t5/t5-base",
                "The house is wonderful.",
-               80))
+               20))
 
+print("Translating with 100 epcoh model, generation length 80 (20% DATA)")
 model_name = "./9_lora_fine_tuned_t5_translation_model_epoch100"
-print(evaluate_model(model_name, 
-               "google-t5/t5-base",
-               "The house is wonderful.",
+token_name = "9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100"
+for text in eval_texts:
+    print(text+"---> "+evaluate_model(model_name, 
+               token_name,
+               text,
                80))
-print(evaluate_model(model_name, 
-               "google-t5/t5-base",
-               "I have mixed emotions!",
+    
+print("\nTranslating with 100+ epoch model, generation length 80 (+ 20% extra data fed) ")
+model_name = "./data40_9_lora_fine_tuned_t5_translation_model_epoch100"
+token_name = "./data40_9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100"
+for text in eval_texts:
+    print(text+"---> "+evaluate_model(model_name, 
+               token_name,
+               text,
                80))
-print(evaluate_model(model_name, 
-               "google-t5/t5-base",
-               "How are you today?",
-               80))
+    
+# model_name = "./9_lora_fine_tuned_t5_translation_model_epoch100"
+# token_name = "9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100"
+
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "The house is wonderful.",
+#                80))
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "I have mixed emotions!",
+#                80))
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "How are you today?",
+#                80))
+
+
+# model_name = "./data40_9_lora_fine_tuned_t5_translation_model_epoch100"
+# token_name = "./data40_9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100"
+
+
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "The house is wonderful.",
+#                80))
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "I have mixed emotions!",
+#                80))
+# print(evaluate_model(model_name, 
+#                token_name,
+#                "How are you today?",
+#                80))

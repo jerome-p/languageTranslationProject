@@ -117,6 +117,7 @@ def run_validation(model, validation_ds, tokenizer_src, tokenizer_tgt, max_len, 
         bleu = metric(predicted, [expected])
         writer.add_scalar('validation BLEU', bleu, global_step)
         writer.flush()
+        
 
 def get_all_sentences(ds, lang):
     for item in ds:

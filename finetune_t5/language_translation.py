@@ -45,11 +45,11 @@ print(f'Max length of train source sentence: {max_len_src}')
 print(f'Max length of train target sentence: {max_len_tgt}')
 
 #Since the dataset is only one split, i.e train. Splitting to create train and test
-split_dataset = raw_datasets["train"].train_test_split(train_size=0.2, seed=20)   #was 0.7
+split_dataset = raw_datasets["train"].train_test_split(train_size=0.4, seed=20)   #was 0.7 #was 0.2
 print(split_dataset) 
 #Further splitting inorder to reduce size of dataset
-split_datasets = split_dataset["train"].train_test_split(train_size=0.85, seed=20) #was 0.7
-print(split_datasets)
+split_datasets = split_dataset["train"].train_test_split(train_size=0.7, seed=20) #was 0.7 #was 0.85
+print(split_datasets) 
 #Renaming the test split 
 split_datasets["validation"] = split_datasets.pop("test")
 
@@ -96,6 +96,15 @@ def compute_metrics(eval_pred):
     results = bleu.compute(predictions=decoded_preds, references=decoded_labels)
     bleu_2 = bleu_metric(decoded_preds, decoded_labels)
     print(results)
+    
+    # metric = torchmetrics.CharErrorRate()
+    # cer = metric(decoded_preds, decoded_labels)
+    # print(cer)
+
+    # # Compute the word error rate
+    # metric = torchmetrics.WordErrorRate()
+    # wer = metric(decoded_preds, decoded_labels)
+    # print(wer)
 
     precision, recall, f1, _ = precision_recall_fscore_support(decoded_labels, decoded_preds, average="weighted")
     acc = accuracy_score(decoded_labels, decoded_preds)
@@ -104,7 +113,9 @@ def compute_metrics(eval_pred):
             "accuracy": acc,
             "f1": f1,
             "precision": precision,
-            "recall": recall
+            "recall": recall,
+            # "cer": cer,
+            # "wer": wer
     }
 
 # Defining LoRA Fine tuning parameters.
@@ -158,7 +169,7 @@ trainer = Seq2SeqTrainer(
 
 # Fine-tune the model
 # Check for a checkpoint to resume training
-checkpoint_path = os.path.join(save_directory, "checkpoint-42850") # Change number before training
+checkpoint_path = os.path.join(save_directory, "checkpoint-86557") # Change number before training
 print(checkpoint_path) #
 if os.path.exists(checkpoint_path): 
     print("Resuming training from the last checkpoint...")
@@ -168,8 +179,8 @@ else:
     trainer.train()
 
 #Save the fine-tuned model
-trainer.save_model("./9_lora_fine_tuned_t5_translation_model_epoch100")
-tokenizer.save_pretrained("./9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100")
+trainer.save_model("./data40_9_lora_fine_tuned_t5_translation_model_epoch100")
+tokenizer.save_pretrained("./data40_9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100")
 
 # Test the model
 # eval_model = AutoModelForSeq2SeqLM.from_pretrained("./9_lora_fine_tuned_t5_translation_model_epoch100")
