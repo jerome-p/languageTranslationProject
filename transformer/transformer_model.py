@@ -3,6 +3,9 @@ import torch.nn as nn
 import math
 
 class LayerNormalization(nn.Module):
+    """
+    Defining the Layer normalization layer
+    """
 
     def __init__(self, features: int, eps:float=10**-6) -> None:
         super().__init__()
@@ -20,6 +23,9 @@ class LayerNormalization(nn.Module):
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
 
 class FeedForwardBlock(nn.Module):
+    """
+    Creating Fully connected feed forward block
+    """
 
     def __init__(self, d_model: int, d_ff: int, dropout: float) -> None:
         super().__init__()
@@ -32,6 +38,9 @@ class FeedForwardBlock(nn.Module):
         return self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
 
 class InputEmbeddings(nn.Module):
+    """
+    Creating the input embedding layer
+    """
 
     def __init__(self, d_model: int, vocab_size: int) -> None:
         super().__init__()
@@ -45,6 +54,9 @@ class InputEmbeddings(nn.Module):
         return self.embedding(x) * math.sqrt(self.d_model)
     
 class PositionalEncoding(nn.Module):
+    """
+    Creating the Poistional embedding
+    """
 
     def __init__(self, d_model: int, seq_len: int, dropout: float) -> None:
         super().__init__()
@@ -81,6 +93,10 @@ class ResidualConnection(nn.Module):
             return x + self.dropout(sublayer(self.norm(x)))
 
 class MultiHeadAttentionBlock(nn.Module):
+    """
+    Creating the Multi-head attention block.
+    This is needs the number of heads and dmodel dimension
+    """
 
     def __init__(self, d_model: int, h: int, dropout: float) -> None:
         super().__init__()
@@ -89,6 +105,7 @@ class MultiHeadAttentionBlock(nn.Module):
         # Make sure d_model is divisible by h
         assert d_model % h == 0, "d_model is not divisible by h"
 
+        #Creating query, Key and value
         self.d_k = d_model // h # Dimension of vector seen by each head
         self.w_q = nn.Linear(d_model, d_model, bias=False) # Wq
         self.w_k = nn.Linear(d_model, d_model, bias=False) # Wk
@@ -98,6 +115,10 @@ class MultiHeadAttentionBlock(nn.Module):
 
     @staticmethod
     def attention(query, key, value, mask, dropout: nn.Dropout):
+        """
+        This function implements the attention mechanism
+        Takes in query,key, mask and dropout layer
+        """
         d_k = query.shape[-1]
         # Just apply the formula from the paper
         # (batch, h, seq_len, d_k) --> (batch, h, seq_len, seq_len)
@@ -134,7 +155,9 @@ class MultiHeadAttentionBlock(nn.Module):
         return self.w_o(x)
 
 class EncoderBlock(nn.Module):
-
+    """
+    Creating the Encoder block, consiting of all components in the encoder.
+    """
     def __init__(self, features: int, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float) -> None:
         super().__init__()
         self.self_attention_block = self_attention_block
@@ -159,6 +182,9 @@ class Encoder(nn.Module):
         return self.norm(x)
 
 class DecoderBlock(nn.Module):
+    """
+    Creating the decoder block containing all components of decoder
+    """
 
     def __init__(self, features: int, self_attention_block: MultiHeadAttentionBlock, cross_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float) -> None:
         super().__init__()
@@ -196,6 +222,10 @@ class ProjectionLayer(nn.Module):
         return self.proj(x)
     
 class Transformer(nn.Module):
+    """
+    Creates the transformer architecture. By combining Encoder and Decoder blocks
+    
+    """
 
     def __init__(self, encoder: Encoder, decoder: Decoder, src_embed: InputEmbeddings, tgt_embed: InputEmbeddings, src_pos: PositionalEncoding, tgt_pos: PositionalEncoding, projection_layer: ProjectionLayer) -> None:
         super().__init__()
@@ -224,6 +254,14 @@ class Transformer(nn.Module):
         return self.projection_layer(x)
     
 def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int, d_model: int=512, N: int=6, h: int=8, dropout: float=0.1, d_ff: int=2048) -> Transformer:
+    """
+    This funcction put together all the components of the transformer. Including the projection layer.
+    Takes in source and target vocab sice, source and target sequence length, dmodel dimension
+    N number of stacks for encoder and decoer, number of heads H and droput value.
+    
+    returns  transformer model 
+    
+    """
     # Create the embedding layers
     src_embed = InputEmbeddings(d_model, src_vocab_size)
     tgt_embed = InputEmbeddings(d_model, tgt_vocab_size)
