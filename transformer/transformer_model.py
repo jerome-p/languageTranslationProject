@@ -260,7 +260,6 @@ def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int
     N number of stacks for encoder and decoer, number of heads H and droput value.
     
     returns  transformer model 
-    
     """
     # Create the embedding layers
     src_embed = InputEmbeddings(d_model, src_vocab_size)
