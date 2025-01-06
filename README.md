@@ -20,11 +20,12 @@ Fine tuned model, uses hugging face APIs. All the log files and model files save
 Requuirements:
 - Python version 3.9
 - PyTorch (Cuda version if using GPU)
+  
 a requirements.txt file is provided, with the libraries installed on my local setup.
 
-Visualisaions.py 
+Visualisations.py 
 - This file expects a folder with csv format logs for each model and metric
 - Running the file produces matplotlib graphs of the logs.
 
-This project is an introduciton to machine language translation. The 2 models chosen to train singnify a big milesones in the development of MT neural networks. The Transformer Architecture is proved to be versatile and powerful for not just transalation but also other NLP tasks. The fine tuned model T5 base is also based on the same Transformer architecture. Fine Tuning proved to be a far better approach to traingin LLMs on limited compute resources. 
+This project is an introduciton to machine language translation. The 2 models chosen to train singnify a big milestones in the development of MT neural networks. The Transformer Architecture is proved to be versatile and powerful for not just transalation but also other NLP tasks. The fine tuned model T5 base is also based on the same Transformer architecture. Fine Tuning proved to be a far better approach to traingin LLMs on limited compute resources. 
 The T5 model was fine tuned on a very low amount of data and was stll able to translate English text to Finnish text. Which is it was not pre trianed on. It achieved a bleu score of 0.195. 
