@@ -1,3 +1,26 @@
+
+"""
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+This code is broken. The code implementaion is a combination of random fixes from online and suggestions from tools like chatGPT.
+
+None of the results were included in the report. This was the starting point of the project and in the interst of saving time. 
+Development on this model was skipped. In the future, I plan to get the code running.
+
+The broken code is still in the repository and not deleted as I was told to include everything done 
+in the supervision sessions with the supervisor.
+
+ 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+"""
+
 import torch
 from torchmetrics import BLEUScore
 import seq2seq_2 as s2s
