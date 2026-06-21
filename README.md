@@ -20,14 +20,14 @@ A from-scratch PyTorch implementation of the original Transformer architecture, 
 - Saved tokenizer/model checkpoints (e.g. `9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100/`).
 
 ### `seq2seq/` — RNN-based baseline (incomplete)
-A sequence-to-sequence RNN model attempted as a starting baseline. The author explicitly notes in the file's header comment that **this implementation is broken** (a mix of online fixes and AI-assisted debugging that never converged) and that none of its results were used in the final report; it is kept only because the supervisor asked for all work-in-progress code to remain in the repository.
+A sequence-to-sequence RNN model attempted as a starting baseline. **this implementation is broken** (a mix of online fixes and AI-assisted debugging that never converged) and  none of its results were used in the final report; it is kept only because the supervisor asked for all work-in-progress code to remain in the repository.
 
 ### Other files
 - **`visualisations.py` / `visualisations.ipynb`** — reads CSV-format training/evaluation logs (`logs_csv/`) for each model and metric, and plots them with `matplotlib` (loss curves, BLEU/F1/precision/recall, CER, WER) — the rendered output is in `graphs/` and `graphs2/`.
 
 ## Results summary
 
-Per the author's notes, the LoRA fine-tuned T5 model — despite being trained on a comparatively small amount of data and not having seen Finnish during pre-training — achieved a BLEU score of **0.195**, demonstrating that fine-tuning a pre-trained model is a markedly more compute-efficient route to a usable translation system than training a Transformer from scratch on limited data and hardware.
+The LoRA fine-tuned T5 model — despite being trained on a comparatively small amount of data and not having seen Finnish during pre-training — achieved a BLEU score of **0.195**, demonstrating that fine-tuning a pre-trained model is a markedly more compute-efficient route to a usable translation system than training a Transformer from scratch on limited data and hardware.
 
 ## Dependencies
 
