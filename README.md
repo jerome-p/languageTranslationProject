@@ -1,31 +1,51 @@
-# Machine Language Translation using Deep Learing methods.
-
-This repository contains code for a language translation project.
-
-The repo consists of 3 models 
-1. Seq2Seq (broken)
-2. Transformer
-3. Fine-tuned T5 base model.
-
-Running the files
-- To run each model, make sure you are in model's folder.
-  -  The transformer model is trained by running the main.py file.
-  - To train the T5 model, run the language_translation.py file.
-
-The Transformer model follows the implementaion by https://github.com/hkproj/pytorch-transformer
-and all the configurations for traingin the model is done via the config file. Edit this file before running the main.py file
-
-Fine tuned model, uses hugging face APIs. All the log files and model files saved by training each of the model will in saved in the model's directory.
-
-Requuirements:
-- Python version 3.9
-- PyTorch (Cuda version if using GPU)
-  
-a requirements.txt file is provided, with the libraries installed on my local setup.
-
-Visualisations.py 
-- This file expects a folder with csv format logs for each model and metric
-- Running the file produces matplotlib graphs of the logs.
-
-This project is an introduciton to machine language translation. The 2 models chosen to train singnify a big milestones in the development of MT neural networks. The Transformer Architecture is proved to be versatile and powerful for not just transalation but also other NLP tasks. The fine tuned model T5 base is also based on the same Transformer architecture. Fine Tuning proved to be a far better approach to traingin LLMs on limited compute resources. 
-The T5 model was fine tuned on a very low amount of data and was stll able to translate English text to Finnish text. Which is it was not pre trianed on. It achieved a bleu score of 0.195. 
+languageTranslationProject — Neural Machine Translation: Transformer vs. Fine-Tuned T5
+A comparative study of two neural machine translation approaches for English-to-Finnish translation: a Transformer encoder-decoder built and trained from scratch, and a pre-trained T5 model adapted via parameter-efficient fine-tuning (LoRA). A third, Seq2Seq (RNN-based) baseline was also attempted but is left in the repository unfinished/non-functional, per the author's own notes.
+What this repository contains
+transformer/ — Transformer built from scratch
+A from-scratch PyTorch implementation of the original Transformer architecture, based on hkproj/pytorch-transformer:
+transformer_model.py — the architecture itself: LayerNormalization, FeedForwardBlock, multi-head self-/cross-attention, positional encoding, and the encoder/decoder stack, assembled by build_transformer(...).
+dataset.py — BilingualDataset, a PyTorch Dataset that tokenizes source/target sentence pairs, pads/truncates them to a fixed sequence length, and builds the causal (look-ahead) mask used by the decoder.
+config.py — central training configuration (batch size, epoch count, learning rate, model dimension d_model=512, sequence length, source/target languages). The dataset source is the Hugging Face opus_books corpus, translating English (en) to Finnish (fi).
+main.py — the training/evaluation loop: trains a WordLevel tokenizer (via Hugging Face tokenizers) on the corpus, trains the model with label-smoothing cross-entropy loss, runs greedy decoding for validation, logs BLEU/word-error-rate metrics to TensorBoard, and renders a word cloud of the training vocabulary.
+attention_visual.ipynb — loads a trained checkpoint and visualises attention-head weights using altair.
+finetune_t5/ — LoRA fine-tuning of a pre-trained T5
+language_translation.py — fine-tunes google-t5/t5-base on the Helsinki-NLP/tatoeba English→Finnish pairs using a LoRA adapter (peft.LoraConfig/get_peft_model) and Hugging Face's Seq2SeqTrainer, with BLEU computed via both evaluate and torchmetrics.
+data_eda.py — exploratory analysis of the dataset (sentence-length statistics, word cloud of the source text).
+evaluate_lang_trans.py — loads a fine-tuned checkpoint via the transformers.pipeline API and runs ad-hoc translation tests.
+Saved tokenizer/model checkpoints (e.g. 9_lora_fine_tuned_t5_translation_model_tokenizer_epoch100/).
+seq2seq/ — RNN-based baseline (incomplete)
+A sequence-to-sequence RNN model attempted as a starting baseline. The author explicitly notes in the file's header comment that this implementation is broken (a mix of online fixes and AI-assisted debugging that never converged) and that none of its results were used in the final report; it is kept only because the supervisor asked for all work-in-progress code to remain in the repository.
+Other files
+visualisations.py / visualisations.ipynb — reads CSV-format training/evaluation logs (logs_csv/) for each model and metric, and plots them with matplotlib (loss curves, BLEU/F1/precision/recall, CER, WER) — the rendered output is in graphs/ and graphs2/.
+Results summary
+Per the author's notes, the LoRA fine-tuned T5 model — despite being trained on a comparatively small amount of data and not having seen Finnish during pre-training — achieved a BLEU score of 0.195, demonstrating that fine-tuning a pre-trained model is a markedly more compute-efficient route to a usable translation system than training a Transformer from scratch on limited data and hardware.
+Dependencies
+From the repository's requirements.txt (Python 3.9):
+datasets==3.1.0
+huggingface-hub==0.26.2
+matplotlib==3.8.2
+nltk==3.9.1
+numpy==1.26.4
+pillow==10.2.0
+seaborn==0.13.2
+tensorboard==2.15.2
+torchaudio==2.5.1+cu124
+torchmetrics==1.5.1
+torchtext==0.17.2
+torchvision==0.20.1+cu124
+tqdm==4.66.6
+transformers==4.46.1
+visualkeras==0.0.2
+wordcloud==1.9.4
+Also used but not pinned in the file: torch (PyTorch, CUDA build matching the +cu124 torchvision/torchaudio above), peft (LoRA adapters), evaluate (BLEU/ROUGE metrics), tokenizers (Hugging Face fast tokenizers), accelerate (Trainer backend), altair (attention visualisation).
+Install with: pip install -r requirements.txt (a CUDA-enabled GPU is recommended for both the Transformer and T5 training runs).
+Running the code
+Transformer: edit transformer/config.py to set training parameters, then run python main.py from inside transformer/.
+T5 fine-tuning: run python language_translation.py from inside finetune_t5/.
+Visualisations: point visualisations.py at a folder of CSV-format logs (one CSV per metric per model) to regenerate the comparison plots.
+References
+Vaswani, A. et al. (2017). Attention Is All You Need — the architecture implemented from scratch in transformer/.
+Raffel, C. et al. (2020). Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer (T5) — the pre-trained model fine-tuned in finetune_t5/.
+Hu, E. J. et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models — the fine-tuning method used for T5.
+hkproj/pytorch-transformer — the base implementation the from-scratch Transformer code follows.
+OPUS Books corpus and Helsinki-NLP/tatoeba — the parallel English–Finnish datasets used for training/fine-tuning.
